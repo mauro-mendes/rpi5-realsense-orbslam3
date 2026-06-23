@@ -24,6 +24,16 @@ RUN git clone --depth 1 https://github.com/stevenlovegrove/Pangolin /Pangolin &&
     make -j$(nproc) && make install && ldconfig && \
     rm -rf /Pangolin
 
+# CMake 3.25+ required by eshan-sud ORB-SLAM3 (Ubuntu 22.04 ships 3.22)
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null \
+    | gpg --dearmor - \
+    | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null && \
+    echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' \
+    | tee /etc/apt/sources.list.d/kitware.list >/dev/null && \
+    apt-get update && apt-get install -y --only-upgrade cmake && \
+    rm -rf /var/lib/apt/lists/* && \
+    cmake --version
+
 # ORB-SLAM3 (eshan-sud fork, tested on aarch64 Debian/Ubuntu)
 RUN git clone https://github.com/eshan-sud/ORB_SLAM3 /ORB_SLAM3 && \
     cd /ORB_SLAM3 && chmod +x build.sh && ./build.sh
