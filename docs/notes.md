@@ -107,8 +107,27 @@ realsense_producer: 60 frames sent
 ```
 
 **Terminal 2 — start the ORB-SLAM3 Docker container:**
+
+Headless (sem display, para produção):
 ```bash
 docker run --rm --network host orb-slam3-rpi5
+```
+
+Com viewer Pangolin (monitor conectado ao RPi5):
+```bash
+xhost +local:docker   # permite Docker usar o display local
+docker run --rm --network host \
+    -e DISPLAY=:0 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    orb-slam3-rpi5 --viewer
+```
+
+Via SSH com X11 forwarding (conectar com `ssh -X user@rpi5`):
+```bash
+docker run --rm --network host \
+    -e DISPLAY=$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    orb-slam3-rpi5 --viewer
 ```
 
 Expected output:

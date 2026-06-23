@@ -74,13 +74,19 @@ static void extract_pose(const Sophus::SE3f& Tcw,
 }
 
 // ------------------------------------------------------------------
-int main()
+int main(int argc, char** argv)
 {
-    std::cout << "slam_bridge: loading ORB-SLAM3..." << std::endl;
+    bool use_viewer = false;
+    for (int i = 1; i < argc; i++) {
+        if (std::strcmp(argv[i], "--viewer") == 0) use_viewer = true;
+    }
+
+    std::cout << "slam_bridge: loading ORB-SLAM3"
+              << (use_viewer ? " (viewer ON)" : " (headless)") << "..." << std::endl;
 
     ORB_SLAM3::System SLAM(VOCAB_PATH, SETTINGS_PATH,
                             ORB_SLAM3::System::RGBD,
-                            false);   // false = no Pangolin viewer
+                            use_viewer);
 
     std::cout << "slam_bridge: ORB-SLAM3 ready" << std::endl;
 
