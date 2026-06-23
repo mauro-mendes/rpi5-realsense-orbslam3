@@ -9,6 +9,7 @@ find_package(OpenCV 4 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(Pangolin REQUIRED)
 
 set(ORB_SLAM3_DIR /ORB_SLAM3)
 
@@ -22,6 +23,7 @@ include_directories(
     ${OpenCV_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
+    ${Pangolin_INCLUDE_DIRS}
 )
 
 link_directories(
@@ -39,6 +41,7 @@ target_link_libraries(slam_bridge
     ${OpenCV_LIBS}
     ${GLEW_LIBRARIES}
     ${OPENGL_LIBRARIES}
+    ${Pangolin_LIBRARIES}
     zmq
     pthread
     -Wl,-rpath,${ORB_SLAM3_DIR}/lib

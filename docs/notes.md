@@ -355,3 +355,13 @@ Fix:
 - Add GLEW/OpenGL to include_directories and target_link_libraries
 Note: at RUNTIME in headless mode (`use_viewer=false`), the Pangolin/GL code path
 is never executed — only the declarations are needed to compile.
+
+**Error 9 — slam_bridge link: `undefined reference to pangolin::HandlerScroll`**
+```
+undefined reference to symbol '_ZTVN8pangolin13HandlerScrollE'
+/usr/local/lib/libpango_display.so.0: error adding symbols: DSO missing from command line
+```
+Compilation succeeded (100%) but link failed — Pangolin libraries not in link step.
+Fix: add `find_package(Pangolin REQUIRED)` + `${Pangolin_LIBRARIES}` + `${Pangolin_INCLUDE_DIRS}`
+to CMakeLists.txt. Pangolin was installed to /usr/local/ via `make install` in the
+Pangolin build step, so find_package locates it automatically.
