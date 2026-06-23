@@ -140,6 +140,43 @@ docker run --rm --network host \
 Ao parar com `Ctrl+C`, o arquivo `~/slam_output/KeyFrameTrajectory.txt` fica salvo no RPi5.
 Formato TUM: `timestamp tx ty tz qx qy qz qw` — pode ser plotado com `evo` ou com o `plot_trial.py`.
 
+---
+
+## Step 5b — Gravar o vídeo da sessão
+
+**Vídeo RGB da câmera** (recomendado para experimentos):
+```bash
+source ~/realsense-env/bin/activate
+python host/realsense_producer.py --record --label teste1
+# salva em: output/realsense_teste1_YYYYMMDD_HHMMSS.mp4
+```
+
+**Screen capture da janela Pangolin** (opcional, para apresentação/paper):
+
+Requer `ffmpeg` instalado (`sudo apt-get install -y ffmpeg`).
+Abrir um **terceiro terminal** enquanto o viewer está rodando:
+
+```bash
+# Descubra o tamanho da janela do Pangolin primeiro (ou use 1280x720)
+ffmpeg -f x11grab -r 30 -s 1280x720 -i :0 \
+    ~/slam_output/pangolin_screen.mp4
+# Ctrl+C para parar quando terminar o experimento
+```
+
+Para capturar só a janela do Pangolin (sem o resto da tela), use `xwininfo` para descobrir a posição:
+```bash
+xwininfo -name "ORB-SLAM3"
+# anote x_offset e y_offset e ajuste: -i :0+x_offset,y_offset
+```
+
+**Resumo do que é salvo por sessão:**
+
+| Arquivo | Onde | Como |
+|---------|------|------|
+| `output/realsense_*.mp4` | host | `--record` no producer |
+| `slam_output/KeyFrameTrajectory.txt` | host (via volume) | automático ao parar |
+| `slam_output/pangolin_screen.mp4` | host | ffmpeg screen capture (opcional) |
+
 Expected output:
 ```
 slam_bridge: loading ORB-SLAM3...
