@@ -385,3 +385,30 @@ naming to docker.io/library/orb-slam3-rpi5:latest  done
 ```
 Total errors encountered and fixed during build: 10
 Image ready to run. Proceed to Step 4 (Run).
+
+### 2026-06-23 — End-to-end test: SUCCESS ✓
+
+Full pipeline validated on spare RPi5:
+
+```
+RealSense D435i
+  → realsense_producer.py (host, ZMQ PUB :5571)
+  → slam_bridge (Docker, ORB-SLAM3 RGBD)
+  → slam_adapter.py (host, ZMQ SUB :5570)
+  → application reads SLAMPose(x, y, z, yaw, state)
+```
+
+Sample output from `slam_adapter.py` while moving camera slowly:
+```
+pos=(0.002, -0.011, -0.002) yaw=0.001 [OK]
+pos=(-0.001, -0.000, -0.012) yaw=-0.047 [OK]
+pos=(-0.003, 0.000, -0.012) yaw=-0.073 [OK]
+```
+
+**Tracking notes:**
+- State goes `OK` immediately after map init (~1s with textured surface in view)
+- "Fail to track local map!" appears when camera moves too fast → slow down
+- Smooth/white walls have few features → add posters or tape for experiments
+- Map init message: `New Map created with 946 points` (indoor desktop scene)
+
+**Bug fixed during test:** `SLAMPose` was missing `state` field — added to `host/slam_adapter.py`.
