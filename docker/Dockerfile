@@ -8,32 +8,33 @@ RUN apt-get update && apt-get install -y \
     libopencv-dev libopencv-contrib-dev \
     libeigen3-dev libglew-dev \
     libssl-dev libusb-1.0-0-dev \
+    libzmq3-dev \
     python3 python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# librealsense2 — Intel official packages for Ubuntu 22.04 ARM64
-RUN curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp \
-    | tee /etc/apt/trusted.gpg.d/librealsense.pgp > /dev/null && \
-    echo "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" \
-    > /etc/apt/sources.list.d/librealsense.list && \
-    apt-get update && apt-get install -y \
-    librealsense2-utils librealsense2-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Python deps for host scripts (producer / adapter run on host, but include here for dev)
+RUN pip3 install pyzmq numpy
 
-# Pangolin (ORB-SLAM3 visualization dependency)
+# Pangolin (ORB-SLAM3 visualization dependency — built headless, no display needed)
 RUN git clone --depth 1 https://github.com/stevenlovegrove/Pangolin /Pangolin && \
     mkdir /Pangolin/build && cd /Pangolin/build && \
-    cmake .. -DCMAKE_BUILD_TYPE=Release && \
-    make -j$(nproc) && make install && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF && \
+    make -j$(nproc) && make install && ldconfig && \
     rm -rf /Pangolin
 
-# ORB-SLAM3 — RPi5 fork (eshan-sud, tested on Debian Bookworm)
+# ORB-SLAM3 (eshan-sud fork, tested on aarch64 Debian/Ubuntu)
 RUN git clone https://github.com/eshan-sud/ORB_SLAM3 /ORB_SLAM3 && \
     cd /ORB_SLAM3 && chmod +x build.sh && ./build.sh
 
-# Python deps for slam_node.py
-RUN pip3 install pyzmq numpy pyrealsense2
+# slam_bridge: C++ ZMQ + ORB-SLAM3 node
+COPY CMakeLists.txt  /bridge_src/CMakeLists.txt
+COPY slam_bridge.cpp /bridge_src/slam_bridge.cpp
+RUN mkdir /bridge_src/build && cd /bridge_src/build && \
+    cmake .. && make -j$(nproc) && \
+    cp /bridge_src/build/slam_bridge /slam_bridge
 
-COPY slam_node.py /slam_node.py
+# Camera settings
+COPY D435i_RGBD.yaml /D435i_RGBD.yaml
 
-CMD ["python3", "/slam_node.py"]
+# Run headless — no display required
+CMD ["/slam_bridge"]
