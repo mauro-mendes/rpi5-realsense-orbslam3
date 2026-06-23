@@ -171,6 +171,10 @@ int main(int argc, char** argv)
         }
     }
 
+    // Save trajectory (TUM format: timestamp tx ty tz qx qy qz qw)
+    SLAM.SaveKeyFrameTrajectoryTUM("/output/KeyFrameTrajectory.txt");
+    std::cout << "slam_bridge: trajectory saved to /output/KeyFrameTrajectory.txt" << std::endl;
+
     SLAM.Shutdown();
     zmq_close(sub);
     zmq_close(pub);
