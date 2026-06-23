@@ -7,16 +7,28 @@ to the ORB-SLAM3 Docker container via ZMQ (:5571).
 Usage:
     source ~/realsense-env/bin/activate
     python host/realsense_producer.py
+    python host/realsense_producer.py --record          # saves RGB video
+    python host/realsense_producer.py --record --label test1
 """
+import argparse
 import json
 import time
-import numpy as np
-import zmq
-import pyrealsense2 as rs
+from datetime import datetime
+from pathlib import Path
 
-WIDTH = 640
+import cv2
+import numpy as np
+import pyrealsense2 as rs
+import zmq
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--record", action="store_true", help="Save RGB video to output/")
+parser.add_argument("--label", default="", help="Label appended to filename")
+args = parser.parse_args()
+
+WIDTH  = 640
 HEIGHT = 480
-FPS = 30
+FPS    = 30
 
 # ZMQ publisher
 ctx = zmq.Context()
@@ -34,6 +46,18 @@ align = rs.align(rs.stream.color)
 profile = pipeline.start(cfg)
 depth_scale = profile.get_device().first_depth_sensor().get_depth_scale()
 print(f"realsense_producer: depth scale = {depth_scale:.6f} m/unit")
+
+# Video writer (optional)
+video_writer = None
+if args.record:
+    out_dir = Path("output")
+    out_dir.mkdir(exist_ok=True)
+    ts  = datetime.now().strftime("%Y%m%d_%H%M%S")
+    lbl = f"_{args.label}" if args.label else ""
+    vid_path = out_dir / f"realsense{lbl}_{ts}.mp4"
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    video_writer = cv2.VideoWriter(str(vid_path), fourcc, FPS, (WIDTH, HEIGHT))
+    print(f"realsense_producer: recording to {vid_path}")
 
 frame_count = 0
 try:
@@ -56,13 +80,21 @@ try:
         }).encode()
 
         pub.send_multipart([header, color.tobytes(), depth.tobytes()])
-        frame_count += 1
 
+        if video_writer is not None:
+            # VideoWriter expects BGR
+            video_writer.write(cv2.cvtColor(color, cv2.COLOR_RGB2BGR))
+
+        frame_count += 1
         if frame_count % 30 == 0:
             print(f"realsense_producer: {frame_count} frames sent")
+
 except KeyboardInterrupt:
     print("\nStopped.")
 finally:
+    if video_writer is not None:
+        video_writer.release()
+        print(f"realsense_producer: video saved.")
     pipeline.stop()
     pub.close()
     ctx.term()
