@@ -24,11 +24,13 @@
 #include <iostream>
 #include <string>
 
+#include <GL/glew.h>  // must be before any Pangolin/ORB-SLAM3 includes
+
 #include <zmq.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include <System.h>   // ORB_SLAM3
+#include <System.h>   // ORB_SLAM3 (pulls in Viewer.h → Pangolin → gl.hpp)
 
 static const char* VOCAB_PATH    = "/ORB_SLAM3/Vocabulary/ORBvoc.txt";
 static const char* SETTINGS_PATH = "/D435i_RGBD.yaml";

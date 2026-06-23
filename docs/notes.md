@@ -339,3 +339,19 @@ Same pattern — g2o include path also missing.
 Fix: add ALL Thirdparty paths at once to avoid further iterations:
 - include: DBoW2, g2o (added to include_directories)
 - link: DBoW2/lib, g2o/lib (added to link_directories + target_link_libraries + rpath)
+
+**Error 8 — slam_bridge: Pangolin gl.hpp — OpenGL functions not declared**
+```
+/usr/local/include/pangolin/gl/gl.hpp:350:5: error: 'glCopyImageSubDataNV' was not declared
+/usr/local/include/pangolin/gl/gl.hpp:524:9: error: 'glDeleteRenderbuffersEXT' was not declared
+... (dozens of GL function errors)
+```
+Root cause: `System.h` → `Tracking.h` → `Viewer.h` → Pangolin → `gl.hpp`.
+Pangolin's gl.hpp uses OpenGL extension functions that need GLEW headers to be
+included FIRST (before any Pangolin include) to declare them.
+Fix:
+- Add `#include <GL/glew.h>` as first include in slam_bridge.cpp
+- Add `find_package(GLEW REQUIRED)` + `find_package(OpenGL REQUIRED)` to CMakeLists.txt
+- Add GLEW/OpenGL to include_directories and target_link_libraries
+Note: at RUNTIME in headless mode (`use_viewer=false`), the Pangolin/GL code path
+is never executed — only the declarations are needed to compile.
