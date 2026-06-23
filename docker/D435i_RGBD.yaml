@@ -1,6 +1,6 @@
 %YAML:1.0
 
-# ORB-SLAM3 settings — Intel RealSense D435i, 640x480 RGB-D
+# ORB-SLAM3 settings — Intel RealSense D435i, 640x480 RGBD-Inertial
 # Nominal intrinsics. For better accuracy, replace fx/fy/cx/cy with values
 # from: python -c "import pyrealsense2 as rs; ..."
 
@@ -39,7 +39,33 @@ ORBextractor.nLevels: 8
 ORBextractor.iniThFAST: 20
 ORBextractor.minThFAST: 7
 
-# Viewer is disabled (false) when running headless in Docker
+# -----------------------------------------------------------------------
+# IMU — Intel RealSense D435i
+# -----------------------------------------------------------------------
+# Noise density values from Intel D435i datasheet (typical):
+#   Gyro:  0.014 °/s/√Hz → 2.44e-4 rad/s/√Hz  (using 1.7453e-4 as commonly validated)
+#   Accel: 0.0014 m/s²/√Hz
+# Random walk from Allan variance characterization of D435i.
+IMU.NoiseGyro: 1.7453e-4      # rad/s/√Hz
+IMU.NoiseAcc:  1.4142e-3      # m/s²/√Hz
+IMU.GyroWalk:  1.9393e-5      # rad/s²/√Hz  (gyro bias random walk)
+IMU.AccWalk:   3.0000e-3      # m/s³/√Hz   (accel bias random walk)
+IMU.Frequency: 200            # Hz — native accel rate (gyro is 400Hz, interpolated)
+
+# T_b_c1: transformation from camera (c) to IMU body frame (b).
+# Computed from pyrealsense2 extrinsics: gyro.get_extrinsics_to(color)
+# SDK returns column-major R and t (gyro→color). T_b_c = inverse of that.
+# Measured on this specific D435i unit (serial varies slightly between units).
+IMU.T_b_c1: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: f
+   data: [ 0.9999720, -0.0055380,  0.0050411, -0.020278,
+           0.0055216,  0.9999794,  0.0032764,  0.005005,
+          -0.0050591, -0.0032485,  0.9999819,  0.011520,
+           0.0,        0.0,        0.0,        1.0]
+
+# Viewer settings
 Viewer.KeyFrameSize: 0.05
 Viewer.KeyFrameLineWidth: 1
 Viewer.GraphLineWidth: 0.9
