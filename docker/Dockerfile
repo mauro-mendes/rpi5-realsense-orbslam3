@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
     libeigen3-dev libglew-dev \
     libssl-dev libusb-1.0-0-dev \
     libzmq3-dev \
-    libepoxy-dev \
+    libepoxy-dev libopengl-dev libgl1-mesa-dev libegl1-mesa-dev \
+    libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
     python3 python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
