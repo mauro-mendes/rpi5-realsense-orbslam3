@@ -63,6 +63,7 @@ RUN mkdir /bridge_src/build && cd /bridge_src/build && \
 # Camera settings
 COPY D435i_RGBD.yaml /D435i_RGBD.yaml
 
-# Default: headless (no display)
-# With viewer: docker run ... -e DISPLAY=:0 -v /tmp/.X11-unix:/tmp/.X11-unix orb-slam3-rpi5 --viewer
-CMD ["/slam_bridge"]
+# ENTRYPOINT allows passing --viewer as argument at runtime:
+#   headless:  docker run orb-slam3-rpi5
+#   with GUI:  docker run ... -e DISPLAY=:0 -v /tmp/.X11-unix:/tmp/.X11-unix orb-slam3-rpi5 --viewer
+ENTRYPOINT ["/slam_bridge"]
