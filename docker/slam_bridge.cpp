@@ -24,7 +24,7 @@
 #include <iostream>
 #include <string>
 
-#include <GL/glew.h>  // must be before any Pangolin/ORB-SLAM3 includes
+#include <epoxy/gl.h>  // must be before any Pangolin/ORB-SLAM3 includes (Pangolin uses epoxy, not GLEW)
 
 #include <zmq.h>
 #include <opencv2/core.hpp>

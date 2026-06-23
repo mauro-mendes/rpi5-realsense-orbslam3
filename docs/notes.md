@@ -356,6 +356,16 @@ Fix:
 Note: at RUNTIME in headless mode (`use_viewer=false`), the Pangolin/GL code path
 is never executed — only the declarations are needed to compile.
 
+**Error 10 — GLEW vs Epoxy conflict**
+```
+/usr/include/epoxy/gl.h:38:2: error: #error epoxy/gl.h must be included before (or in place of) GL/gl.h
+```
+GLEW includes `GL/gl.h` internally. Pangolin (built with epoxy, not GLEW) then tries
+to include `epoxy/gl.h` which conflicts. Fix:
+- Replace `#include <GL/glew.h>` with `#include <epoxy/gl.h>` in slam_bridge.cpp
+- Remove `find_package(GLEW)` and `${GLEW_*}` from CMakeLists.txt
+- Add `epoxy` to target_link_libraries
+
 **Error 9 — slam_bridge link: `undefined reference to pangolin::HandlerScroll`**
 ```
 undefined reference to symbol '_ZTVN8pangolin13HandlerScrollE'
