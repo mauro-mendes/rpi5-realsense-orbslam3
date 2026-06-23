@@ -375,3 +375,13 @@ Compilation succeeded (100%) but link failed — Pangolin libraries not in link 
 Fix: add `find_package(Pangolin REQUIRED)` + `${Pangolin_LIBRARIES}` + `${Pangolin_INCLUDE_DIRS}`
 to CMakeLists.txt. Pangolin was installed to /usr/local/ via `make install` in the
 Pangolin build step, so find_package locates it automatically.
+
+**Docker image build: SUCCESS** ✓
+```
+[100%] Built target slam_bridge   (14.2s)
+COPY D435i_RGBD.yaml              (0.1s)
+exporting to image                (179.7s)
+naming to docker.io/library/orb-slam3-rpi5:latest  done
+```
+Total errors encountered and fixed during build: 10
+Image ready to run. Proceed to Step 4 (Run).
