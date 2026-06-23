@@ -321,4 +321,12 @@ The eshan-sud DBoW2 uses `boost::serialization` (the original DBoW2 doesn't).
 Fix: add `libboost-serialization-dev` as a **separate** RUN layer between the CMake
 upgrade and the ORB-SLAM3 build, so Pangolin + CMake cache layers are preserved.
 
-**ORB-SLAM3 build: REBUILDING with -j2 + boost** (expected ~90–120 min)
+**ORB-SLAM3 build: SUCCESS** (1094s ≈ 18 min with -j2) ✓
+
+**Error 6 — slam_bridge: `DBoW2/BowVector.h: No such file or directory`**
+```
+/ORB_SLAM3/include/KeyFrame.h:24:10: fatal error: DBoW2/BowVector.h: No such file or directory
+```
+CMakeLists.txt for slam_bridge was missing the DBoW2 include path.
+Fix: add `${ORB_SLAM3_DIR}/Thirdparty/DBoW2` to `include_directories`.
+Only CMakeLists.txt changes → ORB-SLAM3 layer (step 7) stays cached.

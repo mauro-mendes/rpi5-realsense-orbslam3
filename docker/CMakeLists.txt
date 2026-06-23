@@ -14,6 +14,7 @@ include_directories(
     ${ORB_SLAM3_DIR}/include
     ${ORB_SLAM3_DIR}/include/CameraModels
     ${ORB_SLAM3_DIR}/Thirdparty/Sophus
+    ${ORB_SLAM3_DIR}/Thirdparty/DBoW2
     ${EIGEN3_INCLUDE_DIR}
     ${OpenCV_INCLUDE_DIRS}
 )
