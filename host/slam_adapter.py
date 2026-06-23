@@ -20,6 +20,7 @@ class SLAMPose:
     z: float         # meters, vertical
     yaw: float       # radians
     timestamp: float
+    state: str       # "OK" or "LOST"
 
 
 class SLAMAdapter:
@@ -55,6 +56,7 @@ class SLAMAdapter:
                     z=data["z"],
                     yaw=data["yaw"],
                     timestamp=data["timestamp"],
+                    state=data.get("state", "LOST"),
                 )
                 with self._lock:
                     self._latest = pose
