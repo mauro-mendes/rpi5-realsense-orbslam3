@@ -35,8 +35,18 @@ RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/nul
     cmake --version
 
 # ORB-SLAM3 (eshan-sud fork, tested on aarch64 Debian/Ubuntu)
+# Use -j2 to avoid OOM on RPi5 (4 cores * heavy C++ = memory exhaustion)
+# Disable Sophus tests (-DBUILD_SOPHUS_TESTS=OFF) — not needed at runtime
 RUN git clone https://github.com/eshan-sud/ORB_SLAM3 /ORB_SLAM3 && \
-    cd /ORB_SLAM3 && chmod +x build.sh && ./build.sh
+    cd /ORB_SLAM3/Thirdparty/DBoW2 && mkdir build && cd build && \
+        cmake .. -DCMAKE_BUILD_TYPE=Release && make -j2 && \
+    cd /ORB_SLAM3/Thirdparty/g2o && mkdir build && cd build && \
+        cmake .. -DCMAKE_BUILD_TYPE=Release && make -j2 && \
+    cd /ORB_SLAM3/Thirdparty/Sophus && mkdir build && cd build && \
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SOPHUS_TESTS=OFF && make -j2 && \
+    cd /ORB_SLAM3/Vocabulary && tar -xf ORBvoc.txt.tar.gz && \
+    cd /ORB_SLAM3 && mkdir build && cd build && \
+        cmake .. -DCMAKE_BUILD_TYPE=Release && make -j2
 
 # slam_bridge: C++ ZMQ + ORB-SLAM3 node
 COPY CMakeLists.txt  /bridge_src/CMakeLists.txt

@@ -294,4 +294,22 @@ RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/nul
     cmake --version
 ```
 
-**ORB-SLAM3 build: IN PROGRESS** (expected ~30–60 min)
+**Error 4 — ORB-SLAM3 build: RPi5 froze (OOM) at 66%**
+```
+#10 112.9 [ 66%] Linking CXX executable test_geometry
+#10 113.1 [ 66%] Built target test_geometry
+client_loop: send disconnect: Connection reset
+```
+System clock froze at 23:36, SSH dropped, monitor unresponsive — classic OOM during heavy C++ compilation.
+Root cause: `./build.sh` calls `make -j$(nproc)` = 4 parallel jobs. Compiling Sophus tests
+simultaneously on 4 cores exhausts RAM on RPi5 (even 8GB).
+
+Fix:
+- Replace `./build.sh` with manual build steps, using `-j2` throughout
+- Disable Sophus tests: `-DBUILD_SOPHUS_TESTS=OFF` (not needed at runtime)
+- Hard reboot RPi5 (unplug power), then rebuild
+
+Docker cache note: layers 1–4 (apt, Pangolin, CMake upgrade) are still cached on disk
+and will be reused. Only the ORB-SLAM3 layer (step 5) needs to recompile.
+
+**ORB-SLAM3 build: REBUILDING with -j2** (expected ~90–120 min with -j2)
