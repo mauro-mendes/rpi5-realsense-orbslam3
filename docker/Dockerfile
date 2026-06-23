@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     libeigen3-dev libglew-dev \
     libssl-dev libusb-1.0-0-dev \
     libzmq3-dev \
+    libepoxy-dev \
     python3 python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
