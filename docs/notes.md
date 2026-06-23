@@ -312,4 +312,13 @@ Fix:
 Docker cache note: layers 1–4 (apt, Pangolin, CMake upgrade) are still cached on disk
 and will be reused. Only the ORB-SLAM3 layer (step 5) needs to recompile.
 
-**ORB-SLAM3 build: REBUILDING with -j2** (expected ~90–120 min with -j2)
+**Error 5 — DBoW2: `boost/serialization/serialization.hpp: No such file or directory`**
+```
+/ORB_SLAM3/Thirdparty/DBoW2/DBoW2/BowVector.h:17:10: fatal error:
+    boost/serialization/serialization.hpp: No such file or directory
+```
+The eshan-sud DBoW2 uses `boost::serialization` (the original DBoW2 doesn't).
+Fix: add `libboost-serialization-dev` as a **separate** RUN layer between the CMake
+upgrade and the ORB-SLAM3 build, so Pangolin + CMake cache layers are preserved.
+
+**ORB-SLAM3 build: REBUILDING with -j2 + boost** (expected ~90–120 min)

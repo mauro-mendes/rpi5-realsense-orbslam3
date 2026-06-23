@@ -34,6 +34,11 @@ RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/nul
     rm -rf /var/lib/apt/lists/* && \
     cmake --version
 
+# Extra dep required by eshan-sud DBoW2 (uses boost::serialization)
+# Separate layer to preserve Pangolin + CMake cache above
+RUN apt-get update && apt-get install -y libboost-serialization-dev && \
+    rm -rf /var/lib/apt/lists/*
+
 # ORB-SLAM3 (eshan-sud fork, tested on aarch64 Debian/Ubuntu)
 # Use -j2 to avoid OOM on RPi5 (4 cores * heavy C++ = memory exhaustion)
 # Disable Sophus tests (-DBUILD_SOPHUS_TESTS=OFF) — not needed at runtime
