@@ -256,4 +256,42 @@ docker build -t orb-slam3-rpi5 .
 - Repos created on GitHub ✓
 - Wrote slam_bridge.cpp (C++ ZMQ + ORB-SLAM3), CMakeLists.txt, D435i_RGBD.yaml ✓
 - Updated Dockerfile to compile slam_bridge ✓
-- **Next: build Docker image on spare RPi5 and test**
+
+### Docker build — errors encountered and fixes
+
+**Error 1 — Pangolin: `Could NOT find epoxy`**
+```
+CMake Error: Could NOT find epoxy (missing: epoxy_LIBRARIES epoxy_INCLUDE_DIRS)
+```
+Fix: add `libepoxy-dev` to apt-get install.
+
+**Error 2 — Pangolin: `Could NOT find OpenGL (missing: OPENGL_opengl_LIBRARY)`**
+```
+CMake Error: Could NOT find OpenGL (missing: OPENGL_opengl_LIBRARY)
+```
+Ubuntu 22.04 requires explicit GLVND packages. Fix: add to apt-get:
+```
+libepoxy-dev libopengl-dev libgl1-mesa-dev libegl1-mesa-dev
+libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+```
+
+**Pangolin build: SUCCESS** (124s) ✓
+
+**Error 3 — ORB-SLAM3: `CMake 3.25 or higher is required`**
+```
+CMake Error: CMake 3.25 or higher is required. You are running version 3.22.1
+```
+Ubuntu 22.04 ships CMake 3.22. The eshan-sud fork requires 3.25+.
+Fix: install CMake from Kitware's official apt repo (added as a Dockerfile layer
+**after** Pangolin to preserve that build cache):
+```dockerfile
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null \
+    | gpg --dearmor - \
+    | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null && \
+    echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' \
+    | tee /etc/apt/sources.list.d/kitware.list >/dev/null && \
+    apt-get update && apt-get install -y --only-upgrade cmake && \
+    cmake --version
+```
+
+**ORB-SLAM3 build: IN PROGRESS** (expected ~30–60 min)
