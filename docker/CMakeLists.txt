@@ -15,18 +15,27 @@ include_directories(
     ${ORB_SLAM3_DIR}/include/CameraModels
     ${ORB_SLAM3_DIR}/Thirdparty/Sophus
     ${ORB_SLAM3_DIR}/Thirdparty/DBoW2
+    ${ORB_SLAM3_DIR}/Thirdparty/g2o
     ${EIGEN3_INCLUDE_DIR}
     ${OpenCV_INCLUDE_DIRS}
 )
 
-link_directories(${ORB_SLAM3_DIR}/lib)
+link_directories(
+    ${ORB_SLAM3_DIR}/lib
+    ${ORB_SLAM3_DIR}/Thirdparty/DBoW2/lib
+    ${ORB_SLAM3_DIR}/Thirdparty/g2o/lib
+)
 
 add_executable(slam_bridge slam_bridge.cpp)
 
 target_link_libraries(slam_bridge
     ${ORB_SLAM3_DIR}/lib/libORB_SLAM3.so
+    ${ORB_SLAM3_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
+    ${ORB_SLAM3_DIR}/Thirdparty/g2o/lib/libg2o.so
     ${OpenCV_LIBS}
     zmq
     pthread
     -Wl,-rpath,${ORB_SLAM3_DIR}/lib
+    -Wl,-rpath,${ORB_SLAM3_DIR}/Thirdparty/DBoW2/lib
+    -Wl,-rpath,${ORB_SLAM3_DIR}/Thirdparty/g2o/lib
 )

@@ -330,3 +330,12 @@ upgrade and the ORB-SLAM3 build, so Pangolin + CMake cache layers are preserved.
 CMakeLists.txt for slam_bridge was missing the DBoW2 include path.
 Fix: add `${ORB_SLAM3_DIR}/Thirdparty/DBoW2` to `include_directories`.
 Only CMakeLists.txt changes → ORB-SLAM3 layer (step 7) stays cached.
+
+**Error 7 — slam_bridge: `g2o/types/types_six_dof_expmap.h: No such file or directory`**
+```
+/ORB_SLAM3/include/Converter.h:26:9: fatal error: g2o/types/types_six_dof_expmap.h: No such file or directory
+```
+Same pattern — g2o include path also missing.
+Fix: add ALL Thirdparty paths at once to avoid further iterations:
+- include: DBoW2, g2o (added to include_directories)
+- link: DBoW2/lib, g2o/lib (added to link_directories + target_link_libraries + rpath)
