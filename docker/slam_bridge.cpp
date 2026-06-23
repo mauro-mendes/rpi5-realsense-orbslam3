@@ -18,11 +18,16 @@
  *   JSON: {"x":...,"y":...,"z":...,"yaw":...,"timestamp":...,"state":"OK"|"LOST"}
  */
 
+#include <atomic>
+#include <csignal>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <string>
+
+static std::atomic<bool> g_running{true};
+static void signal_handler(int) { g_running = false; }
 
 #include <epoxy/gl.h>  // must be before any Pangolin/ORB-SLAM3 includes (Pangolin uses epoxy, not GLEW)
 
@@ -92,6 +97,9 @@ int main(int argc, char** argv)
 
     std::cout << "slam_bridge: ORB-SLAM3 ready" << std::endl;
 
+    std::signal(SIGINT,  signal_handler);
+    std::signal(SIGTERM, signal_handler);
+
     // ZMQ context
     void* zmq_ctx = zmq_ctx_new();
 
@@ -108,7 +116,7 @@ int main(int argc, char** argv)
 
     int frame_count = 0;
 
-    while (true)
+    while (g_running)
     {
         // Receive 3-part frame
         zmq_msg_t msg_hdr, msg_color, msg_depth;
