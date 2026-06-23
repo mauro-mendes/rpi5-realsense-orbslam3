@@ -423,3 +423,12 @@ Pangolin opened with Map Viewer (3D point cloud) + Current Frame (live grayscale
 with ORB feature squares). Status bar: `Maps: 1, KFs: 13, MPs: 607, Matches: 244`.
 Fix required: `--device /dev/dri:/dev/dri` to pass RPi5 GPU into Docker container.
 Without it: system freezes (OOM from LLVMpipe software rendering).
+
+**Lag fix:** ORB-SLAM3 can't process 30fps in real-time on RPi5 — ZMQ buffer backlog
+causes viewer lag. Fix: `--slam-fps 15` in `realsense_producer.py` sends every 2nd frame.
+
+**Trajectory save fix:** `SaveKeyFrameTrajectoryTUM` was after `while(true)` — unreachable.
+Added SIGINT/SIGTERM signal handler (`g_running` flag). Now Ctrl+C breaks the loop cleanly
+and saves `~/slam_output/KeyFrameTrajectory.txt` before exit.
+
+After Ctrl+C, X11 Pangolin windows stay open as orphans. Close with: `xkill` (click each window).
