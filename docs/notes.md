@@ -123,9 +123,14 @@ xhost +local:docker
 docker run --rm --network host \
     -e DISPLAY=:0 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
+    --device /dev/dri:/dev/dri \
     -v ~/slam_output:/output \
     orb-slam3-rpi5 --viewer
 ```
+
+> **IMPORTANTE**: `--device /dev/dri:/dev/dri` é obrigatório para passar o GPU do RPi5
+> para dentro do container. Sem esse flag, o Pangolin usa software rendering (LLVMpipe)
+> e trava o RPi5 por OOM. Com o flag, usa hardware rendering e abre instantaneamente.
 
 Via SSH com X11 forwarding (conectar com `ssh -X user@rpi5`):
 ```bash
@@ -412,3 +417,9 @@ pos=(-0.003, 0.000, -0.012) yaw=-0.073 [OK]
 - Map init message: `New Map created with 946 points` (indoor desktop scene)
 
 **Bug fixed during test:** `SLAMPose` was missing `state` field — added to `host/slam_adapter.py`.
+
+**Viewer test: SUCCESS** ✓
+Pangolin opened with Map Viewer (3D point cloud) + Current Frame (live grayscale feed
+with ORB feature squares). Status bar: `Maps: 1, KFs: 13, MPs: 607, Matches: 244`.
+Fix required: `--device /dev/dri:/dev/dri` to pass RPi5 GPU into Docker container.
+Without it: system freezes (OOM from LLVMpipe software rendering).
